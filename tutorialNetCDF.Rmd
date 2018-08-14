@@ -1,0 +1,482 @@
+---
+title: "Implementing climate change scenarios by IPCC AR5"
+output:
+  html_document:
+    df_print: paged
+---
+
+# Implementing climate change scenarios by IPCC AR5
+
+To download the RCPs read this [documentation:](https://github.com/uhiltner/paper3_paracou/blob/master/readMe_RCPdb.pdf) (github download).
+
+Work yourself through a tutorial for the data manipulation of netCDF data in R, before processing the RCP data. 
+
+## Tutorial: Reading, restructuring and writing netCDF files in R 
+
+This tutorial helps you to get used to the data processing of netCDF data. This format is used to store the climate scenarios of the IPCC AR5 on a global level. The subchapters of the tutorial show the workflow chronologically.
+
+David Pierce has contributed the 'ncdf4' package for reading netCDF data into R and for creating new netCDF dimensions, variables, and files, or manipulating existing netCDF files. But, this package version does not work with nc-files, which is an older file format version. It works only from nc3-files and higher. Therefore, we have to use the older 'ncdf' package to process the RCP's netCDF data, because ist has been deleted from CRAN. It is available only from the  [CRAN-archive](https://cran.r-project.org/src/contrib/Archive/ncdf/). The following code may help installing an older package from source. Set the chunk option *eval=T* to execute this code.
+
+```{r installNCDF_manually, include=T, eval=F}
+# As URL is known:
+notUfzMem = F
+if(notUfzMem) {
+  packageurl <- "https://cran.r-project.org/src/contrib/Archive/ncdf/ncdf_1.6.9.tar.gz"
+  install.packages(packageurl, repos=NULL, type="source") 
+  library(ncdf, lib.loc = "C:/Artikel_3/dataInput/rcpData/")
+}
+# As UFZ member: go to msg-filer\Software\R-win-library\3.3 on msg and copy the package from there to your PC
+ufzMem = F
+if(ufzMem) library('ncdf', lib.loc = "pathOnPersonalComputerToPackageNCDF")
+
+```
+
+### Reading a netCDF file into R
+
+The example data set 'volcano' comes with R, but is also provided [here](https://www.image.ucar.edu/GSP/Software/Netcdf/example.nc). It is tiny with 23kb.
+
+```{r read_ncdfData, include=T, eval=FALSE}
+# Tutorial on how to handle NetCDF files in R from:----
+# https://www.image.ucar.edu/GSP/Software/Netcdf/
+
+# Load required packages
+library(ncdf, lib.loc = "C:/Users/hiltner/Arbeit/Diss/TP3_Publikationen/3_Artikel/dataInput/rcpData/")
+source("summaryNCDF.R")
+# assign working directory
+dataInput_filesEx <- "/dataInput/rcpData/"
+matchPat_filesEx <- "example"
+# relative path to working direktory and nc data 
+wdPath <- getwd()
+dataPathEx <- paste0(wdPath, dataInput_filesEx)
+# find all file names with pattern as given below:
+fileNamesEx <- list.files(dataPathEx, pattern = matchPat_filesEx) 
+
+
+# Load the example data
+ex.nc = open.ncdf(paste0(dataPathEx,fileNamesEx))
+# Get some info about the data
+print(ex.nc) 
+summary.ncdf(ex.nc)
+
+```
+
+### Extract variables and plot a simple map
+
+```{r extract_subset_Variables, include=F, eval=F}
+
+# Extract variables----
+y = get.var.ncdf(ex.nc, "SN")          # coordinate variable 1
+x = get.var.ncdf(ex.nc, "EW")          # coordinate variable 2
+z = get.var.ncdf(ex.nc, "Elevation")   # variable
+
+# Image plot of terrain cribbed from help (volcano)
+par(mar=c(4,4,1,1))
+filled.contour(x,y,z, color=terrain.colors, asp = 1)
+
+# Extract only subsets of the whole data by specifying start
+# coordinates and counts for how many records to extract in 
+# each dimension. Minus 1 in the counts argument stands for
+# take them all.
+z1 = get.var.ncdf(ex.nc, "Elevation", 
+                  start=c(11, 26), # start with 1st row and 1st col
+                  count=c(5, 5)) # number of rows, number of cols to get
+# the same as  
+z[11:15, 26:30] # matrix[row, col]
+z2 = get.var.ncdf(ex.nc, "Elevation", start=c(11, 1), count=c(5, -1)) #the value "-1" indicates that all entries along that dimension should be read
+# he same as  
+z[11:15,]
+
+```
+
+### Creating a netCDF file from within R
+
+```{r createFile, include=T, eval=FALSE}
+library(ncdf)
+# Creating a NetCDF file
+data(volcano) # dataset comes with R
+
+# put the data in a handy form 
+z = 10*volcano         # matrix of elevations
+y = 100*(1:nrow(z))   # meter spacing (S to N)
+x = 100*(1:ncol(z))   # meter spacing (E to W)
+
+# define the netcdf coordinate variables -- note these have values!
+dim1 = dim.def.ncdf(name = "EW",units = "meters", as.double(x))
+dim2 = dim.def.ncdf(name = "SN",units = "meters", as.double(y))
+
+# define the EMPTY (elevation) netCDF variable
+varz = var.def.ncdf(name = "Elevation", units = "meters", dim = list(dim1,dim2), missval = -1, 
+                    longname="The Classic R New Zealand Volcano")
+
+# associate the netcdf variable with a netCDF file   
+# put the variable into the file, and
+# close
+nc.ex2 = create.ncdf(filename = paste0(wdPath,dataInput_filesEx,"example2.nc"), vars = varz)
+put.var.ncdf(nc = nc.ex2, varid = varz, vals = z)
+close.ncdf(con = nc.ex2)
+
+```
+
+### Reading a variable with 'time'
+
+There is one special dimension: the _unlimited_ dimension. This is a dynamically adjustable dimension that can change throughout the creation of the file with no performance penalty. Mostly this dimension is used as 'time' as the results for the GCM (general circulation model).
+
+Most temporal variables are recorded as a "time since" some start date. Time origin is recorded as an attribute for the variable 'time'. You have to add 1970-Jan-1 to the values of 'synthime' to be able to convert between synoptic time and calendar date. Grab the synTime:units attribute (if it is POSIX-compliant) and use it as origin for the chron command of the 'chron' package.
+
+
+```{r extractTime, include=T, eval=F}
+# load packages needed
+#install.packages("chron")
+library(chron)
+syntime = get.var.ncdf(ex.nc,"synTime")
+a = chron(syntime/86400, origin = c(month=1,day=1,year=1970))
+
+```
+
+NOte: This code from the tutorial is not working as there is not variable 'synTime' in 'ex.nc'! You'll see an error message. 
+
+### Access of multi-dimensional arrays and time variables (such as RCPs)
+
+The example data can be downloaded [here](https://www.image.ucar.edu/GSP/Software/Netcdf/Daily_b06_45.nc). Still tiny with 193kb.
+
+#### Load data and extract variables
+
+```{r read_mDim_ncdfData, include=T, eval=FALSE}
+# load packages needed
+#install.packages("fields")
+#install.packages("chron")
+library(fields)
+library(chron)
+library(ncdf, lib.loc = "C:/Users/hiltner/Arbeit/Diss/TP3_Publikationen/3_Artikel/dataInput/rcpData/")
+library(maps)
+library(mapdata)
+library(ggplot2)
+
+
+# assign working directory
+dataInput_filesC <- "/dataInput/rcpData/"
+matchPat_filesC <- "Daily_"
+# relative path to working direktory and nc data 
+wdPath <- getwd()
+dataPathC <- paste0(wdPath, dataInput_filesC)
+# find all file names with pattern as given below:
+fileNamesC <- list.files(dataPathC, pattern = matchPat_filesC) 
+
+# This dataset happens to be the control experiment
+control = open.ncdf(con=paste0(dataPathC,fileNamesC), write=FALSE, readunlim=FALSE)
+
+# get info about the netCDF data
+print(control)
+# this prints out sensible information
+summary(control)
+# cat is useful for producing output in user-defined functions. It converts its arguments to character vectors, concatenates them to a single character vector.
+cat(paste(control$filename,"has",control$nvars,"variables"), fill=TRUE)
+
+# Extract variables
+long  = get.var.ncdf(nc=control, varid="longitude")   # reads entire dimesion
+lat  = get.var.ncdf(nc=control, varid="latitude")    # ditto
+timearr = get.var.ncdf(nc=control, varid="time")        # reads entire time array
+
+```
+
+#### Plot a simple map of grid locations
+
+```{r plotMap_gridLocation, include=T, echo=T, eval=FALSE}
+# Note: keep the curly brackets, otherwise the code does not work in rmarkdown.
+{ maps::map("state", col = "lightgray", fill = T, border = "white")
+  title("Map of the USA with MM5-grid locations")
+  points(x= long, y= lat, type = NULL, pch = 4, col = "blue")
+}
+
+### This part is not yet working
+switchOn = F
+if(switchOn){
+# or: plot with 'ggplot2' package
+usa <- map_data("usa")
+# ToDo: reshape wide data frames or lists into long data that can be used with 'ggplot2' 
+#https://www.earthdatascience.org/courses/earth-analytics/lidar-raster-data-r/ggmap-basemap/
+#  https://eriqande.github.io/rep-res-eeb-2017/map-making-in-R.html
+#http://www.sthda.com/english/wiki/ggplot2-quick-correlation-matrix-heatmap-r-software-and-data-visualization
+gridloc <- tibble(list(long = long, lat = lat))
+ggplot() +
+  # choose a layout of the theme
+  theme_bw() +
+  # set relationship between units in the y direction and x direction so that aspect ratio is good
+  coord_quickmap() +
+  # draw the map of USA: use grouping variable!!!
+  geom_polygon(data = usa, mapping = aes(x = long, y = lat, group = group),
+               fill = "lightgray", alpha = 0.5, color = "black") +
+  # add data
+  # geom_point(data = gridloc, mapping = aes(x = long, y = lat), shape = 21, color = "black", fill = "blue", size = 1) +
+  # add legend text and axis text
+  labs(title = " Map of the USA with MM5-grid locations", x = "longitute", y = "latitute")
+}  
+
+```
+
+#### Find a day of interest
+
+Find a day of interest and read the other variables for JUST that day. The netCDF format has some "philosophy" associated with this: We need to make a "start" and "count" array. It is very common for netCDF files to be created with a monotonic time array. Enough information should be given in the time attributes to decode the time  array into a calendar date. R has several ways to convert calendar dates into monotonic time arrays.
+
+The metadata in the netCDF file indicates the first time is 1 July 1995 and the base time is in units such that noon on 1 Jan 1601 is t = 0.5.
+
+```{r extractDayOfInterest, include=T, eval=FALSE}
+# Julian time as days since some origin (month, day, year)
+t1 = julian(x=7, d=1, y=1995, origin=c(month = 1, day = 1, year = 1601))
+t1
+# compare to
+timearr[1]
+
+# find one specific date in the netCDF data:
+# ENTER: day desired x, d, y
+targettime = julian(x=7 ,d=4, y=1995, origin = c(month = 1, day = 1, year = 1601))
+#inds = (1:length(timearr))
+# filter desired day out of 'timearray' from netCDF
+t_doi = which(targettime == timearr) # which is the 4th time point in this case.
+# extract dimensions of time variable: 61 49 7
+varsize  = control$var[['PRCP']]$varsize
+# initialize start and count argument used for get.var.ncdf()
+start = c(1, 1, t_doi)  # start with 1st row and 1st col and 4th time value
+count = c(varsize[1], varsize[2], 1) # number of rows, number of cols, number of time poins to get # read in this slice of the data 'control'
+control_prec1 = get.var.ncdf(nc=control, varid = "PRCP", start = start, count = count)
+
+x = 1:nrow(control_prec1) # plot rows along x axis
+y = 1:ncol(control_prec1) # plot col along y axis
+# plot basic raster for one time point
+image.plot(x, y, control_prec1, col = tim.colors(), xlab = "latitute", ylab = "longitute", main = "Precipitation (mm) distribution of 1 time point")
+
+# find more specific dates in the netCDF data:
+# e.g. if you want to get 3 timesteps (starting from a date), for example this also illustrates a special case if you want ENTIRE dimensions
+
+start = c(1, 1, t_doi) # start with 1st row and 1st col and 4th time value
+count = c(-1, -1, 3) # number of rows, number of cols, number of time poins to get (-1 shows all values)
+control_prec2 = get.var.ncdf(nc=control,varid="PRCP",start,count)
+# plot them up
+set.panel(1,3)
+for ( k in 1:3){
+  image.plot( x,y,control_prec2[,,k],col=tim.colors())
+} ### ToDo: check this out for visualizing in 'ggplot2' package, cause these plots look ugly!!!
+
+# another example of subsetting on space dimensions for just one timestep
+# Lets assume that you want to ignore the edges of the space (latitute = 1, 2, latitute-2, latitued-1).
+start = c(3, 3, t_doi) # start with 3rd row and 3rd col and 4th time value
+count = c(varsize[1]-(3+2), varsize[2]-(3+2), 1) # 
+control_prec3 = get.var.ncdf(nc=control,varid="PRCP",start,count)
+
+# another example: grabbing a time series for just one location (25,30)
+# lon,lat location: lonmat[25,30],latmat[25,30]
+start = c(25, 30, 1) # start with 25th row and 30th col and 1st time value
+count = c(1, 1, -1) # number of rows, number of cols, number of time poins to get (-1 shows all values)
+control_prec3 = get.var.ncdf(nc=control,varid="TMAX",start,count)
+# transform units: Celsius + 273 = Kelvin
+control_prec3 <- control_prec3 - 273
+# plot the result over time
+set.panel(1,1)
+plot(control_prec3, type="h", main = "daily maximum temperature", xlab = "time (d)", ylab = "Temperature (°C)", col = "blue")
+# The result of this matches the comments above ...
+month.day.year(t1, origin=c(month = 1, day = 1, year = 1601))
+
+```
+
+### Another example for station data 
+
+Station Data download from [here](https://www.image.ucar.edu/GSP/Software/Netcdf/STN_050258.nc)
+
+
+```{r stationData, include=T, eval=FALSE}
+# assign working directory
+dataInput_filesSD <- "/dataInput/rcpData/"
+matchPat_filesSD <- "STN"
+# relative path to working direktory and nc data 
+wdPath <- getwd()
+dataPathSD <- paste0(wdPath, dataInput_filesSD)
+# find all file names with pattern as given below:
+fileNamesSD <- list.files(dataPathSD, pattern = matchPat_filesSD) 
+
+# This dataset happens to be the control experiment
+station = open.ncdf(con=paste0(dataPathSD,fileNamesSD), write=FALSE, readunlim=FALSE, skip = 1)
+
+# get info about the netCDF data
+print(station)
+# this prints out sensible information
+summary(station)
+# cat is useful for producing output in user-defined functions. It converts its arguments to character vectors, concatenates them to a single character vector.
+cat(paste(station$filename,"has",station$nvars,"variables"), fill=TRUE)
+# extract variables
+lons = get.var.ncdf(nc=station,varid="longitude") # reads entire coordinate variable
+lats = get.var.ncdf(nc=station,varid="latitude") # kinda boring, since the station
+elev = get.var.ncdf(nc=station,varid="elevation") # didn't move. They usually do.
+timearr = get.var.ncdf(nc=station,varid="time") # reads entire time array
+prcp    = get.var.ncdf(nc=station,varid="PRCP") # reads entire precip array
+tmin    = get.var.ncdf(nc=station,varid="TMIN") # ...
+tmax    = get.var.ncdf(nc=station,varid="TMAX")
+tobs    = get.var.ncdf(nc=station,varid="TOBS")
+snow    = get.var.ncdf(nc=station,varid="SNOW")
+
+# plot them up: note that there are many more observations of snow and precip than temperature.
+# The unobserved temperature data must be coded as 'missing' to use the same time coordinate variable. 
+set.panel(2,3) 
+plot(timearr, snow, main='SNOW' )
+plot(timearr, prcp, main='PRCP')
+plot(timearr, tmin, main='TMIN')
+plot(timearr, tmax, main='TMAX')
+plot(timearr, tobs, main='TOBS')
+
+```
+
+## Climate data for Paracou site
+
+The aim is to parameterize the climate module of FORMIND to simulate forest management strategies in context of local climate change conditions on a long-term. This has not yet been done with an individual-based forest growth model. To develop our climate scenarios, we will use field data from the Eddy tower at Paracou measured between 2004 and 2015 as well as the four IPCC AR5-RCPs (2.6, 4.5, 6.0, 8.5). The field data represent historic climate conditions and the RCPs predicted climate change conditions.
+
+The next step requires the netCDF data that was previously downloaded. To learn more about downloading RCPs, please read the following  [documentation](https://github.com/uhiltner/paper3_paracou/blob/master/readMe_RCPdb.pdf).
+
+The IPCC AR5-data used in this study origin from the Geophysical Fluid Dynamics Laboratory
+USA ([NOAA-GFDL](https://www.gfdl.noaa.gov/)) and the [GFDL_ESM2G](https://www.gfdl.noaa.gov/cmip/) model. For the [study site Paracou](https://paracou.cirad.fr/station/location/french-guiana) in French Guiana (Location: 5° 23' N; 52° 54' W), we used data of [RCP 2.6](https://cera-www.dkrz.de/WDCC/CMIP5/Compact.jsp?acronym=NGEGr2),  [RCP 4.5](https://cera-www.dkrz.de/WDCC/CMIP5/Compact.jsp?acronym=NGEGr4), [RCP 6.0](https://cera-www.dkrz.de/WDCC/CMIP5/Compact.jsp?acronym=NGEGr6), and [RCP 8.5](https://cera-www.dkrz.de/WDCC/CMIP5/Compact.jsp?acronym=NGEMr8). For proper citaiton or downloading these data see the RCP's linkages.
+
+We have downloaded spatial data from Paracou located in a rectangle with the geographical limits of the maximum latitude of 3.0°, minimum latitude of 6.0°, maximum longitude of 306.0° and minimum longitude of 309.0°. For all four RCPs we downloaded monthly values between 2006-01-01 to 2100-12-31 of air temperature at surface (tas) and precipitation (pr) as well as monthly values of mole fraction of atmoshperic carbon dioxide (CO2). Additionally, for the RCPs 2.6, 6.0, and 8.5 we downloaded monthly values of leaf area index (lai), gross primary productivity (gpp), vegetation carbon content (cVeg), and wood carbon content (cWood). These were not available for RCP 4.5 at that time. Using the 'ncdf' package and the make_ts function of 'make_ts.R' for R statistical software, we extracted time series. 
+
+### Extract the rcp's climate variables for Paracou site
+
+To learn about how I extracted the values of the climate variables, please, see "make_ts.R". The function make_ts(), which is defined there, reads multiple *.nc files of the same RCP scenario and the same variable, extracts the variables, and makes a time line begining from a certain starting starting point. 
+
+It takes six arguments: 
+
+  1. fnl: list of character strings holding the nc*filenames in the working directory; 
+  
+  2. varId: character vector of length 1 defining the type of climate parameter, which is specified in the filename of the nc-files (e.g. "co2"); 
+  
+  3. rcpId: character vector of length 1 defining the type of rcp szenario, which is specified in the filename of the nc-files (e.g. "rcp45"); 
+  
+  4. lat: latitude of study site (degree NS);
+  
+  5. lon: longitude of study site (degree E); 
+  
+  6. pelv: inter vector on length 1 is needed for extraction of co2 time series only! if "co2" then ENTER presure level 2 (92500 Pa): at ca. 100 m asl, else pelv = 0.
+  
+In this work step, I applied the function make_ts() to all four RCP scenarios for temperature, precipitation, and fraction of atmospheric mole C0~2~ concentration at the study site projected over the years 2006 to 2100. The figure below shows the results of this work step.
+
+```{r climateFromNetCDF_Paracou, include=F}
+# Load required packages and functions
+# ENTER path to ncdf package on your pc:
+library(ncdf, lib.loc = "C:/3_Artikel/dataInput/rcpData/")
+#library(raster)
+# This code chunk is dependant on "make_ts.R". Copy it to the same working directory as this script is 
+source("make_ts.R")
+
+# Assign relative path to working direktory and nc data 
+wdPath <- getwd()
+# ENTER: working directory of *.nc
+dataInput_filesRCP <- "/dataInput/rcpData/"
+# path to RCP data
+dataPathRCP <- paste0(wdPath, dataInput_filesRCP)
+
+# ENTER argument values for make_ts() function
+#rcpId = "Rcp60" # options: rcp26, rcp45, rcp60, rcp85 (see filename of *.nc)
+#varId = "PR" # options: pr, co2, tas, gpp,... (see filename of *.nc)
+#path = dataPathRCP
+#fnl =  list.files(dataPathRCP,pattern="GFDL-ESM2G")
+#lat = 5.25; lon = 307.15 # latitude and longitude of study site: World (global): Longitude 0 to 360 Latitude -90 to 90
+
+# extract time series for climate parmeters desired (tas, pr, co2 between 2006-01-01 to 2100-12-31)
+nc.rcp26.tas <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp26",
+        varId = "Tas",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp26.pr <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp26",
+        varId = "PR",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp26.co2 <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp26",
+        varId = "co2",
+        lat = 5.25,
+        lon = 307.15,
+        pelv = 2)
+nc.rcp45.tas <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp45",
+        varId = "Tas",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp45.pr <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp45",
+        varId = "PR",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp45.co2 <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp45",
+        varId = "co2",
+        lat = 5.25,
+        lon = 307.15,
+        pelv = 2)
+nc.rcp60.tas <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp60",
+        varId = "Tas",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp60.pr <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp60",
+        varId = "PR",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp60.co2 <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp60",
+        varId = "co2",
+        lat = 5.25,
+        lon = 307.15,
+        pelv = 2)
+nc.rcp85.tas <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp85",
+        varId = "Tas",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp85.pr <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp85",
+        varId = "PR",
+        lat = 5.25,
+        lon = 307.15)
+nc.rcp85.co2 <- make_ts(fnl = list.files(dataPathRCP,pattern="GFDL-ESM2G"),
+        path = dataPathRCP,
+        rcpId = "Rcp85",
+        varId = "co2",
+        lat = 5.25,
+        lon = 307.15,
+        pelv = 2)
+
+# make one dataframe per scenario
+ts.rcp26 <- full_join(nc.rcp26.pr, nc.rcp26.tas) %>% full_join(., nc.rcp26.co2) %>% mutate(climate = "RCP 2.6")
+ts.rcp45 <- full_join(nc.rcp45.pr, nc.rcp45.tas) %>% full_join(., nc.rcp45.co2) %>% mutate(climate = "RCP 4.5")
+ts.rcp60 <- full_join(nc.rcp60.pr, nc.rcp60.tas) %>% full_join(., nc.rcp60.co2) %>% mutate(climate = "RCP 6.0")
+ts.rcp85 <- full_join(nc.rcp85.pr, nc.rcp85.tas) %>% full_join(., nc.rcp85.co2) %>% mutate(climate = "RCP 8.5")
+# make one dataframe in long format for 'ggplot2'
+ts.rcpAll_long <- full_join(ts.rcp26, ts.rcp45) %>%
+  full_join(., ts.rcp60) %>%
+  full_join(., ts.rcp85) %>%
+  ### BEWARE: think of unit transformations!!!
+  # pr: kg/(m^2 s)^to mm/mon make: pr * 86400 * (365/12)
+  # tas: °K to °C make: tas - 273.15
+  # co2: 1e-6 to ppm make: co2 * 1000000
+  # time steps since 2006-01-01 rename time_mon
+  mutate(pr = pr * 86400 * (365/12),
+         tas = tas - 273.15,
+         co2 = co2 * 1000000) %>%
+  rename(time = "time since 2006-01-01 00:00:00") %>%
+  gather(key = cpar, value = value, c(pr, tas, co2), factor_key = T)
+
+ts.rcpAll_wide <- bind_cols(ts.rcp26,ts.rcp45,ts.rcp60,ts.rcp85)
+
+if(saveAs) write_csv(ts.rcpAll_long, file.path(dataPathRCP, "rcpAll_timeSeries_Paracou_2006-2100.txt"), col_names = T)
+
+```
