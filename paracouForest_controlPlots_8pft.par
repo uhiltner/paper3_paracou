@@ -1,0 +1,1054 @@
+﻿comment =============================================================================
+comment
+comment		Parametrization for control plots of tropical rainforest with 8 PFTs
+comment		study site: French Guyana, Paracou, Plots 1 and 11 
+comment		Notes Field data base upon forest Inventories for disturbance experiments provided by CIRAD
+comment				description http://paracou.cirad.fr/experimental-design
+comment		contact: Ulrike Hiltner
+comment		references: unpublished
+comment		creation date: 28.03.2017
+comment
+comment =============================================================================
+
+
+
+comment =============================================================================
+comment -------------------    Simulation Information	-----------------------------
+comment =============================================================================
+
+string	ProjectName	"Tropical rainforest, Paracou"
+	\d project name shown in GUI
+
+float	TimeEnd		600.0
+	\u year
+	\d Ending time of the simulation
+	\ld Example value: 500.0 years. TimeEnd indicates the number of simulated years.
+	\i 1 General
+	
+float	TimeStep	1.0
+	\u year
+	\d Time step of the simulation
+	\ld Example value: 1.0 year. TimeStep sets the model time step. FORMIND simulates all processes once for all trees within the whole area. It is possible to simulate more or less than one year: 0.00274<=TimeStep<=5
+	\i 1 General
+
+float	OutputStep	1.0
+	\u years
+	\d Time step of the output
+	\ld Example value: 1.0 year. OutputStep: Time steps when to save results.
+	\i 1 General
+
+float	OutputStart	0.0
+	\u year
+	\d Starting time of output
+	\ld Example value: 500. Only save results from time step 500 onwards.
+	\i 0 General
+
+int	RandomInit	0
+	\d Initializer for the random generator
+	\ld Defines the starting seed of random generator. Only important if N_Par.random_seed is false.
+	\i 1 General
+
+comment =============================================================================
+comment ----------------       Technical Details	-----------------------------
+comment =============================================================================
+
+float   Switch.DLYR 0.5
+    \u m
+    \r 0.1:50
+    \d Step-width of vertical height discretization of the canopy 
+	\i 0 General
+	
+int		N_Par.Div_MAXTREE	10000
+	\u -
+	\d Maximum number of trees
+	\i 0 General	
+	
+float   Switch.Schwelle 0.1
+    \u m
+    \r 0.0:1.5
+    \d Threshold for the special result-files with the ending *.TH
+	\ld The simulation gives out results of trees with diameter at breast height (dbh) above Switch.Schwelle (size threshold). You find these results in outputfiles ending with _th.
+	\i 1 General
+
+float	N_Par.Div_DiaClassWidth	0.1
+	\u m
+	\r 0.001:2.0
+	\d Constant width of each diameter class of the stem size distribution (for output of *.dia)
+	\i 0 General
+				
+int	Switch.MortThreshold    100
+    \r 0:10000
+    \d Threshold for stochastic(<100)/deterministic(>100) mortality calculation
+	\i 0 General
+				
+int	N_Par.StoreInitialState 1
+    \r 0:1
+    \d Flag for activating pre-initialization of light climate and space conditions
+	\ld important only for starting the simulation with a mature forest stand
+	\i 0  General
+		
+comment =============================================================================
+comment ----------------       List of output files	    -----------------------------
+comment =============================================================================	
+
+int 	myResultFileSwitch.ats		0
+int 	myResultFileSwitch.ba		0
+	\i 1  Output
+int 	myResultFileSwitch.ba_th	1
+int 	myResultFileSwitch.bmpl		0
+int 	myResultFileSwitch.bv		0
+	\i 1  Output
+int 	myResultFileSwitch.bv_th	1
+int 	myResultFileSwitch.bt		0
+	\i 1  Output
+int 	myResultFileSwitch.bt_th	1
+int 	myResultFileSwitch.cflux	1
+	\i 1  Output
+int 	myResultFileSwitch.cfluxplot	0
+int 	myResultFileSwitch.cohort	0
+int 	myResultFileSwitch.cohort_th	0
+int 	myResultFileSwitch.dia		1
+int 	myResultFileSwitch.div		0
+int 	myResultFileSwitch.div_th	0
+int 	myResultFileSwitch.env		1
+int 	myResultFileSwitch.fal		0
+int 	myResultFileSwitch.fire		0
+int 	myResultFileSwitch.ha		0
+int 	myResultFileSwitch.ha_th	1
+int 	myResultFileSwitch.in		0
+int 	myResultFileSwitch.lai		0
+int 	myResultFileSwitch.lai_mean	1
+	\i 1  Output
+int 	myResultFileSwitch.lai_plot	0
+int	myResultFileSwitch.lai_plot_heightlayer	0
+int 	myResultFileSwitch.landslide	0
+int 	myResultFileSwitch.lidarpc	0
+int 	myResultFileSwitch.lidarwf	0
+int 	myResultFileSwitch.log		0
+	\i 1  Output
+int 	myResultFileSwitch.log_bad	0
+int 	myResultFileSwitch.log_nd	0
+int 	myResultFileSwitch.logg_end	0
+int 	myResultFileSwitch.branch	0
+int 	myResultFileSwitch.mort		0
+int 	myResultFileSwitch.mort_th	1
+int 	myResultFileSwitch.n		0
+	\i 1  Output
+int 	myResultFileSwitch.n_th		1
+int 	myResultFileSwitch.pin		0
+int 	myResultFileSwitch.plot		0
+int 	myResultFileSwitch.speciesplot	0
+int 	myResultFileSwitch.speciesplot_th	0
+int 	myResultFileSwitch.prod		1
+int 	myResultFileSwitch.res		0
+int 	myResultFileSwitch.res_th	0
+int 	myResultFileSwitch.restart	0
+int 	myResultFileSwitch.seed		0
+int 	myResultFileSwitch.seedling	0
+int 	myResultFileSwitch.stree	0
+int 	myResultFileSwitch.sv		0
+	\i 1  Output
+int 	myResultFileSwitch.sv_th	1
+int 	myResultFileSwitch.voxfor	0
+int 	myResultFileSwitch.water	1
+int 	myResultFileSwitch.water_plot	0
+int	myResultFileSwitch.water_century_plot	0
+int	myResultFileSwitch.water_century_plot_layer 0
+int	myResultFileSwitch.cflux_century_plot	0
+int	myResultFileSwitch.nflux_century_plot	0
+
+int	myResultFileSwitch.save_parameter_files	0
+int	myResultFileSwitch.result_time_stamp	0
+comment =============================================================================
+comment ----------------      General          --------------------------------------
+comment =============================================================================
+
+int	N_Par.Div_MAXGRP	8
+	\r 1:22
+	\d Number of simulated species groups
+	\ld Total number of simulated Plant Functional Types (PFT). Ex. 3 height categories and 2 light categories => 6 PFTs. NOTE: For now, your project has 3 PFTs. If you change the number of PFTs, you need to adapt the dimension of several parameters.
+	\i 1 General
+
+int	Switch.Ha	1
+	\u sqrt(ha)
+    \r 1:7
+    \d Square root of the number of hectares which should be simulated
+	\ld Here is where you set the area size of your simulated forest. FORMIND simulates squares with the edge length set by Switch.ha, e.g. Switch.ha = 1: 100 m x 100 m = 1 ha; Switch.Ha = 2 simulates a 4 ha forest area and so on.
+	\i 1 General
+		
+string	PinFileNameX    "paracouForest_empty_cc000_8pft.pin"
+	\d Name of PIN-file for the initial forest 
+	\ld  This variable defines the initial distribution of trees for your project. virtual_empty.pin is an empty forest and trees establish over time due to seed ingrowth. You can initialize a forest based on field measuerements. As an example you can find the file virtual_mature.pin in your formid-parameters folder. NOTE: has to be in the same folder as the par file
+	\i 1 General
+
+comment =============================================================================
+comment ----------------      Switches         --------------------------------------
+comment =============================================================================
+
+int	N_Par.random_seed_ON	0
+	\r 0:1
+	\d Switch for activating stochasticity (0: reproducible / 1: NOT reproducible)
+	\ld If activated, a simulation is not replicable. If deactivated, a simulation is replicable. 
+	\i 1 General
+	
+int	N_Par.Closed_boundary	1
+	\r 0:1
+	\d Switch for handling of events at the border of a hectare 
+	\ld 0: what goes out at the border, is lost; 1: what goes out at the border, comes back in on the other side
+	\i 0 General
+	\i 0 General
+
+comment ==============================
+comment --- Switches:Reproduction ----
+comment ==============================
+	
+int	N_Par.Globalseeds	1
+	\r 0:1
+	\d Switch for using global seed ingrowth from outside a hectare
+	\ld Flag for activating constant seed rain from outside.
+	\i 1 Reproduction
+	
+int	N_Par.Seedtree	0
+	\r 0:1
+	\d Switch for activating seed ingrowth by simulated mother trees
+	\i 0 Reproduction
+
+int	N_Par.Puls	0
+	\r 0:1
+	\d Switch for activating pulsed ingrowth of accumulated seeds
+	\i 0 Reproduction
+
+int	N_Par.Densityreg	0
+ 	\r 0:1
+ 	\d Switch for activating the density regulation of establishing seedlings
+	\i 1 Reproduction
+
+int	N_Par.Predmort	0
+ 	\r 0:1
+ 	\d Switch for activating the mother tree and seed density dependent seed predation mortality	
+	\i 0 Reproduction
+	
+int	N_Par.Flag_SpeciesNumber	0
+	\r 0:1
+	\d Switch for activating species number for each tree
+	\i 0 General
+
+comment ==============================
+comment ---- Switches:Mortality ------
+comment ==============================
+
+int	N_Par.Spacelimitation	1
+	\r 0:1
+	\d Switch for activating self-thinning in crowded stand
+	\ld If 1, trees suffer mortality due to crowding.
+	\i 1 Mortality
+
+int	N_Par.Treefall	1
+	\r 0:1
+	\d Switch for deactivating falling of dying trees
+	\i 1 Mortality
+
+int	N_Par.Nogrow	0
+	\r 0:1
+	\d Switch for deactivating biomass growth of trees
+	\i 0 Growth
+
+int	N_Par.Mort_nbinc	0
+	\r 0:1
+	\d Switch for activating mortality due to buffer when binc<0
+	\i 1 Mortality
+	
+int	N_Par.Flag_BackgroundMortality	1
+	\r 0:1
+	\d Switch for activating background mortality	
+	\i 1 Mortality
+
+int	N_Par.Flag_DbhMortality	0
+	\r 0:1
+	\d Switch for activating dbh-dependent mortality	
+	\i 1 Mortality
+
+int	N_Par.Flag_DincMortality	1
+	\r 0:1
+	\d Switch for activating background mortality	
+	\i 1 Mortality
+
+	
+	
+comment ==============================
+comment --- Switches:Fragmentation ---
+comment ==============================
+
+int	N_Par.Fragmentation	0
+	\r 0:1
+	\d Switch for activating increased mortality at the edge area of fragmented forest areas
+	\i 1 Fragmentation
+
+int	N_Par.Frag_highmortbigtree	0
+	\r 0:1
+	\d Switch for activating increased mortality for trees with stem diameter > 0.6 m 
+	\ld
+	\i 1 Fragmentation
+	
+int	N_Par.Frag_lowseed	0
+	\r 0:1
+	\d Switch for activating reduced seed ingrowth by simulated mother trees 
+	\i 1 Fragmentation
+
+int	N_Par.Frag_TemperatureEffects	0
+	\r 0:1
+	\d Switch for activating increased air temperature in the edge area of fragmented forest areas 
+	\i 0 Fragmentation
+	
+comment ==============================
+comment --- Switches:submodules ------
+comment ==============================
+
+int	Log.DoIt    0
+	\r 0:1	
+	\d Switch for activating of logging
+	\i 1 Logging
+	
+int	N_Par.Fire	0
+	\r 0:1
+	\d Switch for activating the fire submodule
+	\i 1 Fire
+	
+int	N_Par.Landslide	0
+	\r 0:1
+	\d Switch for activating the landslide submodule
+	\i 0 Landslide
+	
+int	N_Par.GRASSMIND	0
+	\r 0:1
+	\d Switch for activating GRASSMIND (simulation of grass plants instead of trees)
+	\i 0 Grassmind
+	
+int	N_Par.Century_ON	0
+	\r 0:1
+	\d Switch for activating the soil model CENTURY (currently only usable for GRASSMIND)
+	\i 0 Grassmind
+	
+comment =============================================================================
+comment ----------------      Global seed ingrowth    -------------------------------
+comment =============================================================================
+
+comment 
+array	N_Par.Est_NS_3
+	\u per hectare and year
+	\d Number of seeds reaching a hectare from outside (group-specific)
+	\ld If N_Par.Globalseeds is activated. Defines the number of seeds per PFT to be added to the simulation area (seeds are spread equally over one ha) per year. !HINT! Play around with the values and you will see a strong influence on the succession of the forest.
+	\i 1 Reproduction
+	typeOfArray	int
+	dimension	8
+data
+	2	27	2	15	14	16	20	2
+end
+
+
+comment =============================================================================
+comment ----------------   Establishment of seedlings  ------------------------------
+comment =============================================================================
+
+comment KALIBRIEREN! niedrige Priorität 
+comment initiale Werte aus Köhler et al 2003
+comment original: 0.02	0.02	0.06	0.1		0.02	0.06	0.1		
+array	N_Par.Est_ISeed_3
+	\r 0:1
+	\d Minimum light intensity (relative to full light above canopy) required for establishment of seeds (group-specific)
+	\i 1 Reproduction 
+	typeOfArray	float
+	dimension	8
+data
+	0.01	0.01	0.05	0.20	0.01	0.02	0.15	0.01
+end
+
+comment Tested 	0.25	0.25	0.80	0.01	0.25	0.25	0.01	0.25 AGBobs-AGBsim = 7%
+comment pft4 and pft7 (pioneers) do not grow properly
+array	N_Par.Est_SeedMort_3
+	\u per year
+	\r 0:1
+	\d Mortality rate of seeds remaining in the seed pool (group-specific)
+	\i 0 Reproduction
+	typeOfArray	float
+	dimension	8
+data
+	0	0	0	0	0	0	0	0
+end
+
+comment 
+float	N_Par.Est_DS	0.1
+	\u m
+	\r 0.001:HMax
+	\d Stem diameter of established seedlings if value <1  else: height of established seedlings 
+	\ld Initial diameter size of established seedlings
+	\i 1 Reproduction
+
+	
+comment =============================================================================
+comment ----------------       Mortality         ------------------------------------
+comment =============================================================================
+
+array	N_Par.Mort_FUNCTION_2
+	\r 0:2
+	\d Setting the use of functional relationships for mortality 
+	\d mortality dependent on the stem diameter f(d)
+	\d f(d) => 0(a0+a1*d+a2*SQR(d)) 1(a0-a0/a1*d for d<=a1) 2(a0*pow(d, a1)+a2*pow(d, 2)) 3(a0*exp(-a1*d))
+	\d mortality dependent on the increment of the stem diameter f(dinc)
+	\d f(dinc) => 0(b0+b1*dinc+b2*SQR(dinc)) 1(b0*exp(b1*dinc)) 2(0.02+b0*dinc+b1*pow(dinc, 2)+b2*pow(dinc, 3)) 3(dinc > 0: mort=b1, dinc <=0: mort=b0)
+	\ld Different equations for mortality processes in addition to base mortality (see below). The first column defines the equation for a diameter-dependent mortality The second column defines the equation for a diameter increment –dependent mortality. Can be deactivated if all parameters of N_Par.Mort_mean_19 = 0
+	\i 1 Mortality
+	typeOfArray	int
+	dimension	2
+data
+	1	2
+end
+
+comment calculated from census data
+comment idCodeMeasure 0,6,7: 0.0094	0.0101	0.0151	0.0204	0.0112	0.0077	0.0192	0.0107
+array	N_Par.Mort_mean_19
+	\u per year
+	\r 0:1
+	\d Background mortality rate (group-specific)
+	\ld Base Mortality rate for each PFT. HINT: Play around with the values and you will see a strong influence on the succession of the forest.
+	\i 1 Mortality
+	typeOfArray	float
+	dimension	8
+data
+	0.01	0.01	0.013	0.02	0.01	0.01	0.02	0.01
+end
+
+comment Hiltner et al. 2016
+array	N_Par.Mort_Dinc_31
+	\u per year
+	\d Parameters of the functional relationship used to calculate the added mortality rate dependent on the increment of the stem diameter
+	\ld Parameters a0, a1 and a2 for diameter increment-dependent mortalityare used to increase mortality rates for fast-growing trees. If all values = 0, diameter increment-dependent mortality is deactivated.
+	\i 1 Mortality
+	typeOfArray	float
+	dimension	3	8
+data
+	-7.7175	-7.7175	-7.7175	-7.7175 -7.7175	-7.7175 -7.7175	-7.7175
+	1553.7 1553.7 1553.7 1553.7 1553.7 1553.7 1553.7 1553.7 
+	-113150 -113150 -113150 -113150 -113150 -113150 -113150 -113150
+end
+
+float	N_Par.Mort_FallP	0.5
+	\r 0:1
+	\d Probability of dying trees to fall and damage other trees
+	\ld When a tree dies, it either decomposes standing or it falls. This parameter defines the probability of a dead tree to fall and damage other trees.
+	\i 1 Mortality
+
+comment =============================================================================
+comment ----------------       Geometry                       -----------------------
+comment =============================================================================
+
+array	N_Par.Geo_FUNCTION_7
+	\r 0:5
+	\d Setting the use of functional relationships for geometry calculations of a single tree 
+	\d 1 Height-Stem diameter: 0(h=h0+h1*d+h2*(d^2)) 1(h=d/(1/h0+d/h1)) 2(h=h0*(d^h1))	3(h=(h0*d)/(h1+d))
+	\d 2 remove
+	\d 3 CrownDiameter-Stem diameter: 0(cd=cd0*d) 1(cd=cd0*d+cd1*(d^2)) 2(cd=d/(1/cd0+d/cd1)) 3(cd=cd0*d+cd1*(d^2)+cd2*(d^3)) 4(cd=cd0+cd1*exp(-cd2*d)) 5(cd=cd0*d+cd1*exp(-cd2*d)) 6(cd=cd0*d+cd1) 7(cd=cd0*d/(1+cd0*cd1*d)) 8(cd=cd0*(d^cd1)-cd2)
+	\d 4 Form factor-Stem diameter: 0(f=f0*exp(f1*(d^f2)))  1(f=f0*(d^f1))
+	\d 5 Crown length factor-Height: 0(clp=-c0*c1*h/(c0*h+c1)+c2) 1(clp=c0+c1*h+c2*(h^2)) 2(clp=c0)
+	\d 6 Stem biomass-total tree biomass: 0(tr=t0+t1*(HoutofDFunc->Calculate(1.20, HGRP_BIG))-->Please remove!) 1(tr=t0) 
+	\d 7 Maximum size of a tree: 0(maximum height) 1(maximum stem diameter)
+	\d 8 Aboveground biomass-Stem diameter: 0(b=(d^2)*h*(PI/4.0)*f*(rho/tr)) 1(b=b1*(d^b2)) 2(b=exp(b1*(log(d*100)-b3)*(2*b2+(log(d*100)-b3))/(b2+(log(d*100)-b3))))
+	\d 9 LAI-Stem diameter: 0(lai=l0*(d^l1)) 1(lai=l0+l1*(d/100)) 2(lai=(l0  + l1*d + l2*SQR(d))/ac) 3(lai=(l0 * d + l1 * SQR(d) + l2 * pow(d,3))/ac)
+	\i 1 Geometry  
+	typeOfArray	int
+	dimension	9
+data
+	3	0	8	1	2	1	0	0	0
+end
+
+
+comment HMmean determined from field data
+comment calculated from maximum diameter and Michaelis-Menten Curve
+array	N_Par.Geo_HMmean_5
+	\u m
+	\d Maximum size (height or stem diameter) of a tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	8
+data
+	16.50	34.22	34.61	34.85	40.40	39.96	38.58	39.06
+end
+
+comment Michaelis-Menten-Eq.  Molto et al. 2014 
+comment alpha_P006 = 40.53 beta_P006 = 1.89 alpha_P018 = 53.44 beta_P018 = 1.43
+comment calculated for Formind: mean parameter values for alpha and beta
+array	N_Par.Geo_HD_39
+	\d Parameter of Height-Stem diameter-function of a single tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	3	8
+data
+	47.0	47.0	47.0	47.0	47.0	47.0	47.0	47.0			
+	0.276	0.276	0.276	0.276	0.276	0.276	0.276	0.276			
+	0.0	0.0	0.0	0.0	0.0	0.0	0.0	0.0
+end
+
+
+array	N_Par.Geo_LAIT_21
+	\d Parameter of LAI-Stem diameter-function of a single tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	3	8
+data
+	2.0	2.0	2.0 2.0	2.0	2.0 2.0	2.0
+	0.0	0.0	0.0 0.0	0.0	0.0	0.0	0.0
+	0.0	0.0	0.0 0.0	0.0	0.0	0.0	0.0
+end
+
+comment Formular used in parameterization of Köhler et al. 2003 is not implemented in FORMIND.
+comment Chave et al. 1999 suggest a linear relationship with initial crown diameter.
+comment Chave et al. 1999: cd=cd0*DBH+cd1 fittet after Köhler et al. 2003: cd=cd0*DBH/100+cd1*(DBH/100)^cd2 
+comment fitts well for DBH element [0.1m;2.0m]
+comment final CD Allometrie from Jucker et al. (2017) cd0 = 13.12 cd1 = 0.59
+array	N_Par.Geo_CD_31
+	\d Parameters of Crown diameter-Stem diameter-function of a single tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	3	8
+data
+	13.12 	13.12 	13.12 	13.12 	13.12 	13.12 	13.12 	13.12
+	0.59	0.59	0.59	0.59	0.59	0.59	0.59	0.59	
+	0 		0 		0 		0		0 		0 		0 		0 
+end
+
+comment Dislich et al. 2009 but with DBH in m 
+array	N_Par.Geo_FD_31
+	\d Parameters of Form factor-Stem diameter-function of a single tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	3	8
+data
+	0.425 0.425 0.425 0.425 0.425 0.425 0.425 0.425  
+	-0.18	-0.18	-0.18	-0.18	-0.18	-0.18	-0.18	-0.18
+	0.0	0.0	0.0 0.0	0.0	0.0	0.0	0.0
+end
+
+comment Köhler et al. 2003
+array	N_Par.Geo_CLFH_31
+	\d Parameters of Crown length factor-Height-function of a single tree (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	3	8
+data
+	0.358	0.358	0.358	0.358	0.358	0.358	0.358	0.358	
+	0.0	0.0	0.0 0.0	0.0	0.0 0.0	0.0
+	0.0	0.0	0.0 0.0	0.0	0.0 0.0	0.0
+end
+
+comment STR calibrated from field data after Rutishauser et al. (2010): TR = 0.7
+array	N_Par.Geo_TR_21
+	\r 0:1
+	\d Fraction of stem biomass to total biomass (group-specific)
+	\i 1 Geometry
+	typeOfArray	float
+	dimension	2	8
+data
+	0.70	0.70	0.70	0.70	0.70	0.70	0.70	0.70	
+	0.0	0.0	0.0 0.0	0.0	0.0 0.0	0.0
+end
+
+comment =============================================================================
+comment ----------------            Production                   --------------------
+comment =============================================================================
+
+
+comment KALIBRIEREN mit hoher Priorität c<i<p
+comment initial parameter values umgerechnet aus Köhler et al. 2003
+comment 6.8		6.8		11.3	27.7	6.8		11.3	27.7	6.8
+comment moopen_manuell:  2.0	0.5	2.0	15.0 1.5 1.5 25.0 1.5	
+comment c(klimax,klimax,interm,pionier,klimax,interm,pionier,klimax)
+array	N_Par.Pro_Pmax_3
+	\u mikromol(CO_2)/(m^2*s)
+	\d Maximum leaf photosynthesis (group-specific)
+	\ld Maximum leaf photosynthesis rates for each PFT. Shade intolerant trees have higher rates. HINT: Play around with the values and you will see a strong influence on the succession of the forest.
+	\i 1 Growth
+	typeOfArray	float
+	dimension	3
+data
+	1.12	0.55	2.00	20.59	1.35	1.50	27.00	1.46
+end
+
+comment taken from Köhler et al. 2003: 0.043
+array	N_Par.Pro_Alpha_3
+	\u mikromol(CO_2)/mikromol(photons)
+	\d Slope of light response curve (group-specific)
+	\ld Wood density for each PFT. Important for biomass calculations. Shade tolerant trees have higher wood densities than shade intolerant. HINT: Play around with the values and you will see a strong influence on the biomass of each PFT.
+	\i 1 Growth
+	typeOfArray	float
+	dimension	8
+data
+	0.043	0.043	0.035	0.086	0.043	0.043	0.086	0.043
+end
+
+comment taken from Köhler et al. 2003
+array	N_Par.Div_K
+	\r 0:1
+	\d Light extinction coefficient of leaves (group-specific)
+	\i 1 Growth
+	typeOfArray	float
+	dimension	8
+data
+	0.7	0.7 0.7	0.7 0.7	0.7 0.7	0.7 
+end
+
+float	N_Par.Pro_M	0.1
+	\r 0:1
+	\d Transmission coefficient of leaves
+	\i 0 Growth
+
+float	N_Par.Pro_GLoss	0.2
+	\r 0:1
+	\d Fraction of gross productivity attributed to respiratory costs for structural growth
+	\i 1 Growth
+
+comment weighted mean of species-specific wood density. Calculated from field data and global wsg data base (Chave et al. 1999)
+comment unknown, species-specific wsg values were completed by mean values for famille and genre
+comment c(klimax,klimax,interm,pionier,klimax,interm,pionier,klimax)
+array	N_Par.Pro_Rho_3
+	\u t(odm)/m^3
+	\d Wood density (group-specific)
+	\i 1 Growth
+	typeOfArray	float
+	dimension	8
+data
+	0.76	0.77	0.66	0.55	0.83	0.73	0.56	0.62
+end
+	
+string	N_Par.Growth_Function_Switch	"chanter_maxPos"
+	\r "polynom", "polynom_coefficient" ,"weibull", "richards", "chanter", "chanter_maxPos", "maxHaefner"
+	\d Setting of function used for calculating the potential increment of stem diameter
+	\d "polynom": N_Par.Pro_dbh_growth_max, N_Par.Pro_dbh_growth_maxpoint, N_Par.Pro_dbh_growth_start, N_Par.Pro_dbh_growth_end have to be set
+	\d "polynom_coefficient": same as "polynom" but N_Par.Pro_dbh_growth has to be set (a0 + a1 d + a2 d^2 + a3 d^3)
+	\d "chanter_maxPos": N_Par.Pro_dbh_growth_maxpoint, N_Par.Pro_dbh_growth_max have to be set
+	\d "chanter": N_Par.Pro_dbh_growth has to be set 
+	\d "weibull": N_Par.Pro_dbh_growth has to be set 
+	\d "richards": N_Par.Pro_dbh_growth has to be set
+	\d "maxHaefner": N_Par.Pro_dbh_growth has to be set
+	\i 1 Growth
+
+comment moopen_manuell: 0.01	0.01	0.02	0.02	0.01	0.01	0.02	0.04
+comment KALIBRIEREN (niedrige Priorität!) aus q999_Dinc_m der dbh classes berechnet (class width 1mm)
+array	N_Par.Pro_dbh_growth_max
+	\u m/yr
+	\r 0:1
+	\d Maximum yearly increment of stem diameter (group-specific)
+	\i 1 Growth
+	typeOfArray	float
+	dimension	8
+data
+	0.011	0.018	0.017	0.014	0.025	0.013	0.022	0.031
+end
+
+comment aus q999_Dinc_m der dbh classes berechnet (class width 1mm) moopen_manuell: 0.3	0.3	0.1	0.1	0.3	0.1	0.1	0.3
+array	N_Par.Pro_dbh_growth_maxpoint
+	\r 0:1
+	\d Fraction of maximum stem diameter where a tree reaches its maximum increment of stem diameter (group-specific)
+	\i 1 Growth 
+	typeOfArray	float
+	dimension	8
+data
+	0.24	0.17	0.12	0.11	0.30	0.11	0.17	0.37
+end
+
+
+comment  
+comment =============================================================================
+comment ----------------   Carbon Module    --------------------------------------
+comment =============================================================================
+
+float	N_Par.Cflux_aet	1350
+	\u "mm per year"
+	\d Mean actual evapotranspiration (AET)	
+	\i 1 Carbon
+
+comment next 4 parameter values were taken from Master Thesis of Anne Piechulla (2017)
+int N_Par.InitC_ON	0
+	\u -
+	\r 0:1
+	\d Flag for activating initialisation of soil carbon pools and deadwood carbon pool (otherwise pools start empty)
+	
+comment Outlook: nächste drei parameterwerte befüllen für Langzeitsimulation über 5000a, Rico fragen
+	float	N_Par.CPool_DeadWood	0
+	\u "t(C) per patch"
+	\d Initial carbon content in the deadwood carbon pool
+	\i 1 Carbon
+
+float	N_Par.CPool_Soil_fast	0
+	\u "t(C) per patch"
+	\d Initial carbon content in the fast decomposing soil carbon pool
+	\i 1 Carbon
+
+float	N_Par.CPool_Soil_slow	12.909
+	\u "t(C) per patch"
+	\d Initial carbon content in the slow decomposing soil carbon pool
+	\i 1 Carbon
+	
+comment =============================================================================
+comment -------------       Simple Climate     -----------------------------------
+comment =============================================================================
+
+comment	calculated from Weedon et al. (2014)
+array	N_Par.Env_IS_2
+	\u mikromol(photons)/(m^2*s)
+	\d Mean yearly light intensity (PAR) above canopy during day-length 
+	\i 1 Climate
+	typeOfArray	float
+	dimension	2
+data
+	694.0	694.0
+end
+	
+array	N_Par.Env_DayL_2
+	\u hour
+	\r 0:24
+	\d Length of daily photosynthetic active period, i.e. day-length
+	\i 0 Climate
+	typeOfArray	float
+	dimension	2
+data
+	12.0	12.0
+end
+
+array	N_Par.Env_SeaL_2
+	\r 0:1
+	\d Relative length of wet and dry season 
+	\i 0 Climate
+	typeOfArray	float
+	dimension	2
+data
+	1.0	0.0
+end
+
+comment =============================================================================
+comment ----------------      Advanced Climate      ---------------------------------
+comment =============================================================================
+
+array	N_Par.Climate
+	\r 0:1
+	\d Switches for activating the advanced climate 
+	\d Soil water module; Temperature effects; daily changing radiance; daily changing day-length; vegetation period; CO2
+	\i 1 Climate
+	typeOfArray	int
+	dimension	6
+data 
+	1	1	1	1	0	0
+end
+
+array	N_Par.Climate_File	
+	\d File name and relative path (to the *.par) of daily climate data 
+	\d irradiance, air temperature, day-length, potential evapotranspiration, and CO2
+	\d if dimension is 1, file is used for all patches
+	\d if dimension > 1, patch heterogeneities has to be activated for a proper use of all files
+	\i 1 Climate
+	typeOfArray	string
+	dimension	1
+data 
+	Climate_RCP00_module111.txt
+end
+	comment =============================================================================
+comment ----------------      CO2      ----------------------------------------------
+comment =============================================================================
+
+comment ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+comment ++++++ complex version (Climate[pos 6]=1) ++++++++++++++
+
+comment parameter values for co2 were taken from Thomsen (2015) see also Piechulla (2017)
+float	N_Par.CO2_reference_temperature	26.0
+	\u [grad C]
+	\r 0:1000
+	\d reference temperature
+	\i 1 Climate
+
+comment Annual mean CO2 [ppm] 386. Piechulla (2017): calculated from field data 386
+float	N_Par.CO2_reference_concentration	400.0
+	\r 0:1000
+	\d reference CO2 concentration
+	\i 1 Climate
+	
+float	N_Par.CO2_stomata_reference_concentration	200.0
+	\r 0:1000
+	\d stomata CO2 concentration 
+	\i 1 Climate
+	
+float N_Par.WUE_Transpiration_Assimilation_ratio 0.5	
+	\r 0:1
+	\d ratio of either transpiration decrease (closer 1) or assimilation increase(closer 0) due to higher Water use efficency
+	\i 1 Climate
+	
+
+comment =============================================================================
+comment ----------------      Soil water module   -----------------------------------
+comment =============================================================================
+comment sooil type assumed at Paracou: sandy loam
+
+comment WUE = 1-2. vergleiche Larcher, 2001: Ökophysiologie der Pflanzen, S. 124ff. WUE 6.0 high in Formind tropical virtual
+comment old value: 1.5 per PFT
+array	N_Par.Water_WUE
+	\u g (odm)/kg (H2O)
+	\d Water-use-efficiency-coefficient (group-specific)
+	\i 1 Soil
+	typeOfArray	float
+	dimension	8
+data 
+	1.0	1.0	1.0	1.0	1.0	1.0	1.0	1.0
+end
+
+comment parmeter value calculated after Maidment (1993): Tab. 5.3.2; old value: 9.5
+array	N_Par.Water_PWP
+	\u Volume percent
+	\r 0:100
+	\d Permanent wilting point
+	\i 1 Soil
+	typeOfArray	float
+	dimension	1
+data 
+	10.0
+end
+	
+float	N_Par.Water_KL	0.2
+	\u mm per day
+	\d Interception constant
+	\i 1 Soil
+
+comment parmeter value calibrated after Maidment (1993): Tab. 5.3.2; old value: 35.0
+float	N_Par.Water_POR	35.0
+	\u Volume percent
+	\r 0:100
+	\d Porosity of the soil
+	\i 1 Soil
+
+comment estimated 1/4 day-length; old value: 24.0	
+float	N_Par.Water_RainfallDuration	8.0
+	\u hours
+	\r 0:24
+	\d Hours of rainfall per day
+	\i 1 Soil
+
+comment parmeter value calibrated after Maidment (1993)
+comment old value 0.00000366
+float	N_Par.Water_KS	0.0000037	
+	\r 0:1
+	\d Fully saturated conductivity
+	\i 1 Soil
+
+comment calibrated: old value 0.242
+float	N_Par.Water_L	0.6
+	\r 0:1
+	\d Pore size distribution index
+	\i 1 Soil
+	
+comment parmeter value calculated after Maidment (1993): Tab. 5.3.2; old value: 7.5
+float	N_Par.Water_SW_RES	4.0
+	\u Volume percent
+	\r 0:100
+	\d Residual soil water content
+	\i 1 Soil
+	 
+comment parmeter value calculated after Maidment (1993): Tab. 5.3.2; old value: 22.3
+array	N_Par.Water_FC
+	\u Volume percent
+	\r 0:100
+	\d Field capacity 
+	\i 1 Soil
+	typeOfArray	float
+	dimension	1
+data 
+	28.0
+end
+
+float	N_Par.Water_SD	2.5
+	\u m
+	\d Soil depth
+	\i 1 Soil
+		
+
+comment =============================================================================
+comment ----------------      Temperature effects   ---------------------------------
+comment =============================================================================
+
+comment parameter value calibrated after Tjoelker et al. (2001) by Piechulla (2017)
+float	N_Par.Temperature_Q10	1.71
+	\u temperature degrees
+	\d Base of the temperature effect (Q10-function) affecting the maintenance respiration of a tree
+	\i 1 Climate
+	
+comment comment parameter value calibrated by Piechulla (2017): Field data mean annual temp
+float	N_Par.Temperature_reference	26.0
+	\u temperature degrees
+	\d Reference temperature of the temperature effect (Q10-function) affecting the maintenance respiration of a tree
+	\i 1 Climate
+	
+float	N_Par.Temperature_min	21.35
+	\u temperature degrees
+	\d Minimum temperature for calculating the length of the vegetation period of a tree
+	\i 1 Climate
+	
+string	N_Par.Temperature_Reduction_Algorithm	"norm_4"
+	\r "norm_4", "gutierrez"
+	\d Type of temperature effect used for reducing gross photosynthesis of a tree
+	\i 1 Climate
+
+
+comment -----------------------------------------------------------------------------
+comment --------  N_Par.Temperature_Reduction_Algorithm = "norm_4"  -----------------
+comment -----------------------------------------------------------------------------
+
+comment parameter value calculated from field data by Piechulla (2017)
+float	N_Par.Temperature_opt	26.5
+	\u temperature degrees
+	\r -10:30
+	\d Optimal temperature for maximum gross photosynthesis of a tree (i.e. mean of the normal distribution)
+	\i 1 Climate
+
+comment parameter value calculated from field data by Piechulla (2017)
+float	N_Par.Temperature_sig	4.05
+	\u temperature degrees
+	\r -10:30
+	\d Standard deviation of the normal distribution affecting maximum gross photosynthesis of a tree 
+	\d when temperature deviates from its optimum
+	\i 1 Climate
+	
+comment =============================================================================
+comment ----------------   Reference climate for maintenance respiration    ---------
+comment =============================================================================
+
+array	N_Par.ref_length_of_vegetation_periode
+	\r 0:1
+	\d Fraction of the total year (365 days) which have been considered as the active vegetation period in the reference year(s)
+	\i 1 Climate
+	typeOfArray	float
+	dimension	8
+data
+	1.0	1.0	1.0 1.0	1.0	1.0 1.0	1.0
+end
+
+comment parameter value taken from Köhler (2003)
+array	N_Par.ref_Irradiance
+	\u mikromol (photon)/(m^2 * s)
+	\d Mean yearly radiance during the day-length of the reference year(s)
+	\i 1 Climate
+	typeOfArray	float
+	dimension	8
+data
+	881	881	881	881	881	881	881	881
+end
+
+array	N_Par.ref_environment_reduction
+	\r 0:1
+	\d Tree gross photosynthesis reduction due to temperature effects and soil water deficit effect of the reference year(s)
+	\i 1 Climate
+	typeOfArray	float
+	dimension	8
+data
+	1.0	1.0	1.0 1.0	1.0	1.0 1.0	1.0	
+end
+
+comment =============================================================================
+comment ----------------      Logging Module      --------------------------------------
+comment =============================================================================
+
+comment AGBloss_T1CM4 	
+array	N_Par.Div_COMMERCIAL_A
+	\r 0:1
+	\d Commercial type (group-specific) for logging (0: not commercial; 0-1: partly commercial; 1: commercial)
+	\i 1 Logging
+	typeOfArray	float
+	dimension	8
+data
+	0	0.0362	0.2393	0.0865	0.5718	0.5531	0.3311	0.2706
+end
+
+int	Log.No_HarvestDamage	1
+	\r 0:1
+	\d no damage for potential harvestable trees (0 with damages for harvestable trees, 1 without damages for harvestable trees)
+	\i 1 Logging
+	
+int	Log.Falling_DamagedPlots	1
+	\r 0:1
+	\d 0 random plot, 1 looks for already damaged plots	
+	\i 1 Logging
+comment  einschalten: Werden Schäden weniger?
+	
+float   Log.Time    500.0
+	\u year
+	\d Year for first logging operation
+	\i 1 Logging
+
+array   Log.Diameter
+    \u m
+    \r 0.0:1.5
+    \d Cutting threshold
+	\i 1 Logging
+	typeOfArray	float
+	dimension	8
+data
+	0.55	0.55	0.55	0.55	0.55	0.55	0.55	0.55	
+end
+comment auf 55 cm setzen oder 60 cm 
+	
+float	Log.Cycle   501.0
+	\u year
+	\d Logging cycle
+	\i 1 Logging
+	
+int Log.Min 1
+    \u per hectare
+    \r 0:30
+    \d Minimum number of extracting trees per cycle and hectar
+	\i 1 Logging
+	
+comment erstmal lassen, dieser Parameter sollte sich automatischer ergeben
+int Log.Max 10000
+    \u per hectare
+    \r 0:60
+    \d Maximum number of extracting trees per cycle and hectar
+	\i 1 Logging
+	
+int Log.Rest 0
+    \u per hectare
+    \r 0:60
+    \d Number of remaining trees per cycle and hectar
+	\i 1 Logging
+	
+int Log.DamLinear   0
+	\d Code for afterlogging effects. 0: nothing 1xxxyyy: yyy: percentage of mortality for xxx years after logging
+	\i 0 Logging
+
+comment calculated from field data (plots with t1 treatment)
+array   Log.Dam1
+    \r 0:1 
+    \d Damage for all trees after logging event in corresponding DamDia class
+	\d conventional (example): 0.40    0.50    0.60    0.70
+	\d reduced-impact (example): 0.20    0.25    0.30    0.40
+	\i 1 Logging
+	typeOfArray float
+    dimension   4
+data
+    0.139    0.05    0.028    0.029
+end
+
+comment calculated from field data (plots with t1 treatment)
+array   Log.DamDia
+    \u m
+    \r 0:1.5
+    \d upper thresholds of diameter classes for logging damages
+	\i 1 Logging
+	typeOfArray float
+    dimension   4
+data
+    0.30	0.50	0.80	2.90
+end
+
+float   Log.emission_factor    0.0
+	\u 
+	\r 0:1
+	\d Portion of carbon directly emitted to atmosphere due to logging
+	\d Log.emission_factor == 1: e.g. burning scenario, where all C is emitted.
+	\d Log.emission_factor == 0: e.g. full timber use for furniture, where no C is emitted.
+	\i 1 Logging
+	
